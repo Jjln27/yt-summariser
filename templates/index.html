@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>YouTube Transcript Summarizer</title>
+    <style>
+        :root {
+            --bg-main: #1e1e1e;
+            --bg-input: #2b2b2b;
+            --text-main: #f2f2f2;
+            --text-secondary: #bdbdbd;
+            --accent: #10a37f;
+            --border-radius: 16px;
+            --shadow: 0 2px 16px 0 rgba(0,0,0,0.25);
+        }
+        html, body {
+            height: 100%;
+            margin: 0;
+            padding: 0;
+            background: var(--bg-main);
+            color: var(--text-main);
+            font-family: 'Inter', 'Helvetica Neue', Helvetica, Arial, 'Segoe UI', sans-serif;
+            min-height: 100vh;
+        }
+        body {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+        }
+        .container {
+            background: none;
+            box-shadow: none;
+            border-radius: var(--border-radius);
+            padding: 0;
+            width: 100%;
+            max-width: 480px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        h1 {
+            font-size: 2rem;
+            font-weight: 600;
+            margin-bottom: 2rem;
+            color: var(--text-main);
+            letter-spacing: -1px;
+        }
+        form {
+            width: 100%;
+            display: flex;
+            flex-direction: row;
+            gap: 0.5rem;
+            margin-bottom: 2rem;
+            justify-content: center;
+        }
+        input[type="url"] {
+            background: var(--bg-input);
+            color: var(--text-main);
+            border: none;
+            border-radius: var(--border-radius);
+            padding: 0.9rem 1.2rem;
+            font-size: 1rem;
+            outline: none;
+            width: 100%;
+            transition: box-shadow 0.2s;
+            box-shadow: var(--shadow);
+        }
+        input[type="url"]::placeholder {
+            color: var(--text-secondary);
+            opacity: 1;
+        }
+        button {
+            background: linear-gradient(90deg, #10a37f 0%, #0e9275 100%);
+            color: #fff;
+            border: none;
+            border-radius: var(--border-radius);
+            padding: 0.9rem 1.5rem;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            box-shadow: var(--shadow);
+            transition: background 0.2s, box-shadow 0.2s, transform 0.1s;
+        }
+        button:hover, button:focus {
+            background: linear-gradient(90deg, #13b98a 0%, #0e9275 100%);
+            box-shadow: 0 4px 24px 0 rgba(16,163,127,0.15);
+            transform: translateY(-2px) scale(1.03);
+        }
+        #summary {
+            width: 100%;
+            min-height: 120px;
+            max-height: 400px;
+            overflow-y: auto;
+            background: transparent;
+            border-radius: var(--border-radius);
+            margin-top: 0.5rem;
+            font-size: 1.08rem;
+            line-height: 1.7;
+            white-space: normal;
+            word-break: break-word;
+            display: flex;
+            align-items: flex-start;
+            justify-content: flex-start;
+            padding: 0;
+        }
+        .summary-output {
+            background: #23272f;
+            color: var(--text-main);
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow);
+            padding: 1.5rem 1.2rem;
+            width: 100%;
+            font-size: 1.08rem;
+            line-height: 1.7;
+            margin: 0 auto;
+            margin-bottom: 1.5rem;
+            overflow-x: auto;
+        }
+        .summary-output h2 {
+            font-size: 22px;
+            font-weight: 700;
+            margin: 2em 0 0.7em 0;
+            color: #fff;
+        }
+        .summary-output ul, .summary-output ol {
+            margin: 0 0 1.2em 1.2em;
+            padding-left: 1.2em;
+        }
+        .summary-output li {
+            margin-bottom: 0.5em;
+            color: #f2f2f2;
+            font-size: 1.05em;
+        }
+        .summary-output strong {
+            color: #fff;
+            font-weight: 700;
+        }
+        @media (max-width: 600px) {
+            .container {
+                max-width: 98vw;
+            }
+            form {
+                flex-direction: column;
+                gap: 0.7rem;
+            }
+            .summary-output {
+                padding: 1rem 0.7rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>YouTube Transcript Summarizer</h1>
+        <form id="yt-form">
+            <label for="url">YouTube URL:</label>
+            <input type="url" id="url" name="url" placeholder="Paste YouTube link here..." required autocomplete="off">
+            <button type="submit">Summarize</button>
+        </form>
+        <div id="summary"></div>
+    </div>
+    <script>
+        document.getElementById('yt-form').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            const url = document.getElementById('url').value;
+            const summaryDiv = document.getElementById('summary');
+            summaryDiv.innerHTML = '<span style="opacity:0.7;">Loading...</span>';
+            const response = await fetch('/api/summarize', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ url })
+            });
+            const data = await response.json();
+            if (data.summary) {
+                summaryDiv.innerHTML = data.summary;
+            } else {
+                summaryDiv.innerHTML = `<span style='color:#ff6b6b;'>${data.error || 'An error occurred.'}</span>`;
+            }
+        });
+    </script>
+</body>
+</html> 
